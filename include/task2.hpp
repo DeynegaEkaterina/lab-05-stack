@@ -5,10 +5,6 @@
 #ifndef TEMPLATE_TASK2_HPP
 #define TEMPLATE_TASK2_HPP
 
-struct NodeStack{
-  T value;
-  NodeStack *prev= nullptr;
-};
 
 template <typename T>
 class Stack2 {
@@ -16,7 +12,7 @@ class Stack2 {
   Stack2() = default;
 
   Stack2(const Stack2 &stack) = delete;
-  auto operator=(const Stack &stack) = delete;
+  auto operator=(const Stack2 &stack) = delete;
 
   Stack2(Stack2 &&stack) noexcept {
     this->top = stack.top;
@@ -27,60 +23,44 @@ class Stack2 {
     stack.top = nullptr;
   }
 
+  template<typename...Args>
+  void push_emplace(Args&&...value){
+    top = new NodeStack<T>{{std::forward<Args>(value)...}, top};
+  }
+
   void push(T &&value) {
-    NodeStack<T> *tmp;
-    tmp = top;
-    top = new NodeStack<T>;
-    top->prev = tmp;
-    top->value = value;
+    top = new NodeStack<T>{std::forward<T>(value), top};
   }
 
   const T &head() const {
     if (top)
       return top->value;
     else {
-      throw std::runtime_error("Empty stack");
+      throw std::runtime_error("Empty stack head");
     }
   }
 
   T pop() {
-    NodeStack<T> *tmp;
-    tmp = top;
-    top = top->prev;
-    T tmps = tmp->value;
-    if (tmp) {
-      delete (tmp);
-      tmp = nullptr;
+    if (top){
+      auto *tmp = top;
+      T data = std::move(top->value);
+      top = top->prev;
+      delete tmp;
+      return data;
+    }else {
+      throw std::runtime_error("Empty stack pop");
     }
-    return tmps;
-  else {
-    throw std::runtime_error("Empty stack");
-  }
 }
-
 
 void clearer() {
-  if (top) {
-    while (top->prev) {
-      NodeStack<T> *tmp = std::move(top->prev);
+    while (top) {
+      NodeStack<T> *tmp = top->prev;
       delete (top);
-      top = nullptr;
       top = tmp;
     }
-    delete (top);
-    top = nullptr;
-  }
-  else{
-    throw std::runtime_error("Empty stack");
-  }
 }
 
-  template <typename... Args>
-  void Stack2<T>::push_emplace(Args&&... value) {
-    top = new NodeStack<T>{{std::forward<Args>(value)...}, top};
-  }
-
-~Stack() { clearer(); }
+~Stack2() { clearer(); }
 
  private:
   NodeStack<T> *top = nullptr;

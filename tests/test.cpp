@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include "task1.hpp"
+#include "task2.hpp"
 
 template<typename T>
 struct Fruits{
@@ -99,4 +100,60 @@ TEST(Stack, Struct){
   EXPECT_EQ(amount.head().banana, 5);
   EXPECT_EQ(amount.head().orange, 6);
 }
+
+template<typename T>
+class Animals{
+ public:
+  Animals(T t1, T t2, T t3)
+      :dog(t1), mice(t2), parrot(t3)
+  {}
+  Animals(const Animals &Animal) = delete;
+  auto operator=(const Animals &Animal) = delete;
+  Animals(Animals &&Animal) = default;
+  auto operator=(Animals &&Animal) noexcept -> Animals& = default;
+
+  T dog;
+  T mice;
+  T parrot;
+};
+
+TEST(Stack2, Constructor){
+  EXPECT_TRUE(std::is_move_constructible<Stack<int>>::value);
+  EXPECT_TRUE(std::is_move_assignable<Stack<int>>::value);
+  EXPECT_FALSE(std::is_copy_constructible<Stack<int>>::value);
+  EXPECT_FALSE(std::is_copy_assignable<Stack<int>>::value);
+}
+
+TEST(Stack2, push_pop){
+  Stack2<Animals<int>> amount;
+  Animals<int> test1 (1, 2, 3);
+  Animals<int> test2 (4, 5, 6);
+  Animals<int> test3 (7, 8, 9);
+  amount.push(std::move(test1));
+  amount.push(std::move(test2));
+  amount.push(std::move(test3));
+  EXPECT_EQ(amount.head().dog,  7);
+  EXPECT_EQ(amount.head().mice,  8);
+  EXPECT_EQ(amount.head().parrot,  9);
+
+  amount.pop();
+  EXPECT_EQ(amount.head().dog,  4);
+  EXPECT_EQ(amount.head().mice,  5);
+  EXPECT_EQ(amount.head().parrot,  6);
+}
+
+TEST(Stack2, push_emplace){
+  Stack2<Animals<int>> amount;
+  amount.push_emplace(1,2,3);
+  amount.push_emplace(4,5,6);
+  amount.push_emplace(7,8,9);
+  EXPECT_EQ(amount.head().dog,  7);
+  EXPECT_EQ(amount.head().mice,  8);
+  EXPECT_EQ(amount.head().parrot,  9);
+  amount.pop();
+  EXPECT_EQ(amount.head().dog,  4);
+  EXPECT_EQ(amount.head().mice,  5);
+  EXPECT_EQ(amount.head().parrot,  6);
+}
+
 
