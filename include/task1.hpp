@@ -7,7 +7,7 @@
 #endif // INCLUDE_TASK1_HPP_
 
 template <typename T>
-struct NodeStack{           //узел стека на односв. списке
+struct NodeStack{
   T value;
   NodeStack *prev= nullptr;
 };
@@ -16,7 +16,7 @@ template <typename T>
 class Stack{
 
  public:
-  Stack()  = default;
+  Stack() = default;
 
   Stack(const Stack &stack) = delete;
   auto operator = (const Stack &stack) = delete;
@@ -24,15 +24,13 @@ class Stack{
   Stack(Stack &&stack) noexcept {
     this->top = stack.top;
     stack.top = nullptr;
-  } //компилятор выдает варнинг без ноуэксепт
-  auto operator = (Stack &&stack)  noexcept {
+  }
+  auto operator = (Stack &&stack)  noexcept -> Stack&{
     this->top = stack.top;
     stack.top = nullptr;
-  } //то же самое
-  //нужен ли trailing return type после ноуэкспет? так пропадает варнинг
-  //что лучше auto или Stack&?
+  }
 
-  void push(T&& value){
+  void push(T &&value){
     NodeStack<T> *tmp;
     tmp = top;
     top = new NodeStack<T>;
@@ -40,7 +38,7 @@ class Stack{
     top->value = value;
   }
 
-  void push(const T& value){
+  void push(const T &value){
     NodeStack<T> *tmp;
     tmp = top;
     top = new NodeStack<T>;
@@ -54,7 +52,7 @@ class Stack{
       delete top;
       top = _top;
     }else {
-      throw std::runtime_error("Empty stack");
+      throw std::runtime_error("Empty stack pop");
     }
   }
 
@@ -62,27 +60,21 @@ class Stack{
     if(top)
     return top->value;
     else{
-      throw std::runtime_error("Empty stack");
+      throw std::runtime_error("Empty stack head");
     }
   }
 
-  void clearer() {
-    if (top) {
-      while (top->prev) {
-        NodeStack<T> *tmp = std::move(top->prev);
+  void clearer(){
+      while (top) {
+        NodeStack<T> *tmp = top->prev;
         delete (top);
-        top = nullptr;
-        //std::cout << "cleared";
+
         top = tmp;
       }
-      delete (top);
-      top = nullptr;
-     // std::cout << "cleared";
-    }
   }
 
   ~Stack(){
-    clearer();
+   clearer();
   };
 
  private:
